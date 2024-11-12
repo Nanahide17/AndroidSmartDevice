@@ -5,12 +5,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.annotation.Size
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -38,7 +36,7 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     MainContentComponent(
                         innerPadding = innerPadding,
-                        onButtonClick = { ::goToScan }
+                        onButtonClick = { this.goToScan() }
                     )
                 }
             }
@@ -81,15 +79,5 @@ fun MainContentComponent(innerPadding: PaddingValues, onButtonClick: () -> Unit)
         {
             Text(text = "Scan BLE")
         }
-    }
-
-
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    AndroidSmartDeviceTheme {
-        //MainContentComponent()
     }
 }
