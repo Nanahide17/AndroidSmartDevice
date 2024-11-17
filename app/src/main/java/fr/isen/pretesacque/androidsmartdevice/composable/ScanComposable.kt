@@ -1,14 +1,5 @@
 package fr.isen.pretesacque.androidsmartdevice.composable
 
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothManager
-import android.bluetooth.le.BluetoothLeScanner
-import android.bluetooth.le.ScanCallback
-import android.bluetooth.le.ScanResult
-import android.content.Context
-import android.os.Parcel
-import android.os.Parcelable
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -41,6 +32,7 @@ import fr.isen.pretesacque.androidsmartdevice.R
 @Composable
 fun ScanScreen(
     innerPadding: PaddingValues,
+    warning: String,
     BLE_List: List<String>,
     onStartScan: () -> Unit,
     onStopScan: () -> Unit
