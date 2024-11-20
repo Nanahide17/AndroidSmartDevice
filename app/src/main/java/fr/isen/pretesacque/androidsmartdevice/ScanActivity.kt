@@ -1,7 +1,6 @@
 package fr.isen.pretesacque.androidsmartdevice
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Context
@@ -16,22 +15,34 @@ import androidx.activity.enableEdgeToEdge
 import android.app.AlertDialog
 import android.app.Activity
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.le.BluetoothLeScanner
+import android.bluetooth.le.ScanCallback
+import android.bluetooth.le.ScanResult
 import android.content.BroadcastReceiver
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
+import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-
-private const val REQUEST_ENABLE_BT = 1
-private const val REQUEST_PERMISSION_BT = 1001
+import fr.isen.pretesacque.androidsmartdevice.composable.ScanScreen
 
 class ScanActivity : ComponentActivity() {
 
     private val bluetoothAdapter: BluetoothAdapter? by lazy(LazyThreadSafetyMode.NONE) {
-        val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        val bluetoothManager = getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
         bluetoothManager.adapter
+    }
+    private val bluetoothLeScanner: BluetoothLeScanner? by lazy {
+        (getSystemService(BLUETOOTH_SERVICE) as BluetoothManager).adapter?.bluetoothLeScanner
     }
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
@@ -44,50 +55,57 @@ class ScanActivity : ComponentActivity() {
 
             }
         }
+    private val devices = mutableStateListOf<ScanResult>()
+    private var selectedDevice by mutableStateOf<BluetoothDevice?>(null)
+    private var connectionStatus by mutableStateOf(false)
 
-    private val discoveredDevices = mutableListOf<BluetoothDevice>()
-
-    // BroadcastReceiver pour gérer les appareils découverts
-    private val receiver = object : BroadcastReceiver() {
-        @SuppressLint("MissingPermission")
-        override fun onReceive(context: Context, intent: Intent) {
-            val action: String? = intent.action
-            if (BluetoothDevice.ACTION_FOUND == action) {
-                // Récupérer l'appareil Bluetooth détecté
-                val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
-                device?.let {
-                    if (!discoveredDevices.contains(it)) {
-                        discoveredDevices.add(it) // Ajouter à la liste si non présent
-                        val deviceName = it.name ?: "Appareil inconnu"
-                        val deviceHardwareAddress = it.address // Adresse MAC
-                        // Affiche un Toast avec les informations de l'appareil
-                        Toast.makeText(context, "Appareil ajouté: $deviceName [$deviceHardwareAddress]", Toast.LENGTH_SHORT).show()
-                    }
+    private val scanCallback = object : ScanCallback() {
+        override fun onScanResult(callbackType: Int, result: ScanResult) {
+            result.device?.let { device ->
+                if (!devices.any { it.device.address == device.address }) {
+                    devices.add(result)
                 }
             }
         }
+
+        override fun onScanFailed(errorCode: Int) {
+            Log.e("ScanActivity", "Scan échoué avec le code d'erreur : $errorCode")
+            Toast.makeText(this@ScanActivity, "Scan échoué", Toast.LENGTH_SHORT).show()
+        }
     }
+
+    private var List = listOf("Bonjour", "Hello", "GutenTag", "Hola")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        initScanBLE()
-        setContent {
-            //TODO : mettre composable pour affichage
-            //ScanScreen(
 
+        setContent {
+
+            Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                ScanScreen(
+                    innerPadding = innerPadding,
+                    BLE_List = List,
+                    toggleScan = {
+                        connectionStatus = !connectionStatus
+                        toggleScan()
+                    },
+                    scanning = connectionStatus
+                )
+            }
         }
+
+        initScanBLE()
 
     }
 
     //Lance les différentes vérifications du Bluetooth
     private fun initScanBLE() {
         if (checkBluetoothAvailable(this)) {
-            if (allPermissionGranted()) {
-                checkBluetoothActivated()
-            } else {
-                requestPermissionLauncher.launch(getAllPermissions())
+            if (!allPermissionGranted()) {
+                requestPermissionLauncher.launch(getAllPermissionsForBLE())
             }
+            checkBluetoothActivated()
         }
     }
 
@@ -111,25 +129,27 @@ class ScanActivity : ComponentActivity() {
     }
 
     //Vérifie si le Bluetooth est activé ou non
-    private fun checkBluetoothActivated(){
+    private fun checkBluetoothActivated() {
         if (bluetoothAdapter!!.isEnabled) {
-
+            startScan()
         } else {
             requestBluetoothActivation()
         }
+
     }
 
     //Demande à l'utilisateur d'activé son Bluetooth
-    private fun requestBluetoothActivation(){
+    private fun requestBluetoothActivation() {
         val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-        val bluetoothLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                // L'utilisateur a activé le Bluetooth
-                Toast.makeText(this, "Bluetooth activé", Toast.LENGTH_SHORT).show()
-            } else {
-                // L'utilisateur a refusé d'activer le Bluetooth
+        val bluetoothLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == RESULT_OK) {
+                    // L'utilisateur a activé le Bluetooth
+                    Toast.makeText(this, "Bluetooth activé", Toast.LENGTH_SHORT).show()
+                } else {
+                    // L'utilisateur a refusé d'activer le Bluetooth
+                }
             }
-        }
         bluetoothLauncher.launch(enableBtIntent)
     }
 
@@ -137,19 +157,13 @@ class ScanActivity : ComponentActivity() {
     ///Fonctions pour vérifier permission
     //Vérifie si toutes les permissions sont autorisés
     private fun allPermissionGranted(): Boolean {
-        val allPermission = getAllPermissions()
+        val allPermission = getAllPermissionsForBLE()
         return allPermission.all { permission ->
             ActivityCompat.checkSelfPermission(
                 this,
                 permission
             ) == PackageManager.PERMISSION_GRANTED
         }
-    }
-
-    //Renvoie toutes les permissions pour le Bluetooth
-    private fun getAllPermissions(): Array<String> {
-        val allPermissions = getAllPermissionsForBLE()
-        return allPermissions
     }
 
     //Demande toutes les permissions pour le Bluetooth
@@ -175,40 +189,35 @@ class ScanActivity : ComponentActivity() {
         return allPermissions
     }
 
+    ///
     // Méthode pour démarrer la découverte Bluetooth
-    @SuppressLint("MissingPermission")
-    private fun startBluetoothDiscovery() {
-        if (bluetoothAdapter?.isDiscovering == true) {
-            bluetoothAdapter?.cancelDiscovery()
+
+    private fun toggleScan() {
+        if (connectionStatus) {
+            stopScan()
+        } else {
+            startScan()
         }
-
-        // Vider la liste avant chaque découverte
-        discoveredDevices.clear()
-
-        // Enregistrer le BroadcastReceiver pour ACTION_FOUND
-        val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
-        registerReceiver(receiver, filter)
-
-        // Démarrer la découverte
-        bluetoothAdapter?.startDiscovery()
-        Toast.makeText(this, "Début de la découverte Bluetooth", Toast.LENGTH_SHORT).show()
     }
 
-    // Méthode pour arrêter la découverte Bluetooth
-    @SuppressLint("MissingPermission")
-    private fun stopBluetoothDiscovery() {
-        if (bluetoothAdapter?.isDiscovering == true) {
-            bluetoothAdapter?.cancelDiscovery()
+    private fun startScan() {
+        try {
+            devices.clear()  // Effacer les appareils détectés avant de lancer un nouveau scan
+            bluetoothLeScanner?.startScan(scanCallback)
+            Toast.makeText(this, "Scan BLE démarré", Toast.LENGTH_SHORT).show()
+        } catch (e: SecurityException) {
+            Log.e("ScanActivity", "Permissions manquantes : ${e.message}")
+            Toast.makeText(this, "Permissions requises pour le scan BLE.", Toast.LENGTH_LONG).show()
         }
-
-        // Désenregistrer le BroadcastReceiver
-        unregisterReceiver(receiver)
-        Toast.makeText(this, "Fin de la découverte Bluetooth", Toast.LENGTH_SHORT).show()
     }
 
-    // Méthode pour accéder aux appareils découverts
-    private fun getDiscoveredDevices(): List<BluetoothDevice> {
-        return discoveredDevices
+    private fun stopScan() {
+        try {
+            bluetoothLeScanner?.stopScan(scanCallback)
+            Toast.makeText(this, "Scan BLE arrêté", Toast.LENGTH_SHORT).show()
+        } catch (e: SecurityException) {
+            Log.e("ScanActivity", "Permissions manquantes pour arrêter le scan : ${e.message}")
+        }
     }
 
 }

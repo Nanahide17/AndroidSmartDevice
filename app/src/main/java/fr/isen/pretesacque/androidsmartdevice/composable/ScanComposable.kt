@@ -32,12 +32,11 @@ import fr.isen.pretesacque.androidsmartdevice.R
 @Composable
 fun ScanScreen(
     innerPadding: PaddingValues,
-    warning: String,
+    scanning: Boolean,
     BLE_List: List<String>,
-    onStartScan: () -> Unit,
-    onStopScan: () -> Unit
+    toggleScan: () -> Unit,
+    //onStopScan: () -> Unit
 ) {
-    var scanning by remember { mutableStateOf(false) }
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.SpaceBetween,
@@ -70,12 +69,7 @@ fun ScanScreen(
                         .size(100.dp)
                         .padding(20.dp, 0.dp)
                         .clickable {
-                            if (scanning) {
-                                onStopScan()
-                            } else {
-                                onStartScan()
-                            }
-                            scanning = !scanning
+                            toggleScan()
                         },
                     painter = painterResource(if (scanning) R.drawable.pause_blue_button_1 else R.drawable.play_blue_button),
                     contentDescription = "pause",
@@ -98,7 +92,8 @@ fun ScanScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp),
+                    .padding(16.dp)
+                    .clickable{},
                 verticalArrangement = Arrangement.spacedBy(8.dp) // Espace entre les éléments
             ) {
                 items(BLE_List) { name ->
