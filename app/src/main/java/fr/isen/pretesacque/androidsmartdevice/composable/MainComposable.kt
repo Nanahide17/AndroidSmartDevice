@@ -29,57 +29,49 @@ fun MainContentComponent(innerPadding: PaddingValues, onButtonClick: () -> Unit)
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Blue)
-            .padding(10.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White),
-            contentAlignment = Alignment.Center
+            .background(Color.White),
+        contentAlignment = Alignment.Center
+    )
+    {
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         )
         {
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+            Text(
+                text = "Android Smart Device",
+                fontSize = 22.sp,
+                textAlign = Center,
+                color = Color(0xFF0082FC),
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(innerPadding)
             )
-            {
-                Text(
-                    text = "Android Smart Device",
-                    fontSize = 22.sp,
-                    textAlign = Center,
-                    color = Color(0xFF0082FC),
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(innerPadding)
-                )
-                Text(
-                    text = "Cette application permet de scanner des appareils BLE à proximité.",
-                    textAlign = Center,
+            Text(
+                text = "Cette application permet de scanner des appareils BLE à proximité.",
+                textAlign = Center,
 
-                    )
-                Image(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .padding(12.dp, 10.dp),
-                    painter = painterResource(R.drawable.bluetooth),
-                    contentDescription = "logo"
                 )
-                Button(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(4.dp, 10.dp),
+            Image(
+                modifier = Modifier
+                    .size(100.dp)
+                    .padding(12.dp, 10.dp),
+                painter = painterResource(R.drawable.bluetooth),
+                contentDescription = "logo"
+            )
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(4.dp, 10.dp),
                 onClick = onButtonClick,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF191FB7),
                     contentColor = Color.White
                 )
-                )
-                {
-                    Text(text = "Scan BLE")
-                }
+            )
+            {
+                Text(text = "Scan BLE")
             }
-
         }
-    }
 
+    }
 }

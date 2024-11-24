@@ -56,16 +56,12 @@ class ScanActivity : ComponentActivity() {
             }
         }
     private val devices = mutableStateListOf<ScanResult>()
-    private var selectedDevice by mutableStateOf<BluetoothDevice?>(null)
-    private var connectionStatus by mutableStateOf(false)
+    private var connectionStatus by mutableStateOf(true)
 
-    private val scanCallback = object : ScanCallback() {
+    private val leScanCallback: ScanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
-            result.device?.let { device ->
-                if (!devices.any { it.device.address == device.address }) {
-                    devices.add(result)
-                }
-            }
+            super.onScanResult(callbackType, result)
+            addDeviceIfNotExists(result)
         }
 
         override fun onScanFailed(errorCode: Int) {
@@ -74,7 +70,6 @@ class ScanActivity : ComponentActivity() {
         }
     }
 
-    private var List = listOf("Bonjour", "Hello", "GutenTag", "Hola")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,7 +80,7 @@ class ScanActivity : ComponentActivity() {
             Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                 ScanScreen(
                     innerPadding = innerPadding,
-                    BLE_List = List,
+                    BLE_List = devices,
                     toggleScan = {
                         connectionStatus = !connectionStatus
                         toggleScan()
@@ -109,7 +104,7 @@ class ScanActivity : ComponentActivity() {
         }
     }
 
-    ///Fonction Pour vérifier Bluetooth
+    ///Fonction pour vérifier Bluetooth
     ///Vérifie si le Bluetooth est présent sur l'appareil ou non
     private fun checkBluetoothAvailable(activity: Activity): Boolean {
         //Si le bluetooth est disponible ou non
@@ -131,7 +126,7 @@ class ScanActivity : ComponentActivity() {
     //Vérifie si le Bluetooth est activé ou non
     private fun checkBluetoothActivated() {
         if (bluetoothAdapter!!.isEnabled) {
-            startScan()
+            toggleScan()
         } else {
             requestBluetoothActivation()
         }
@@ -189,7 +184,8 @@ class ScanActivity : ComponentActivity() {
         return allPermissions
     }
 
-    ///
+
+    ///Fonctions pour lancer le bluetooth
     // Méthode pour démarrer la découverte Bluetooth
 
     private fun toggleScan() {
@@ -203,7 +199,7 @@ class ScanActivity : ComponentActivity() {
     private fun startScan() {
         try {
             devices.clear()  // Effacer les appareils détectés avant de lancer un nouveau scan
-            bluetoothLeScanner?.startScan(scanCallback)
+            bluetoothLeScanner?.startScan(leScanCallback)
             Toast.makeText(this, "Scan BLE démarré", Toast.LENGTH_SHORT).show()
         } catch (e: SecurityException) {
             Log.e("ScanActivity", "Permissions manquantes : ${e.message}")
@@ -213,11 +209,17 @@ class ScanActivity : ComponentActivity() {
 
     private fun stopScan() {
         try {
-            bluetoothLeScanner?.stopScan(scanCallback)
+            bluetoothLeScanner?.stopScan(leScanCallback)
             Toast.makeText(this, "Scan BLE arrêté", Toast.LENGTH_SHORT).show()
         } catch (e: SecurityException) {
             Log.e("ScanActivity", "Permissions manquantes pour arrêter le scan : ${e.message}")
         }
     }
 
+    private fun addDeviceIfNotExists(result: ScanResult) {
+        // Vérifiez si l'adresse MAC du périphérique existe déjà dans la liste
+        if (devices.none { it.device.address == result.device.address }) {
+            devices.add(result)
+        }
+    }
 }

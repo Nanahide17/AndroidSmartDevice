@@ -1,5 +1,7 @@
 package fr.isen.pretesacque.androidsmartdevice.composable
 
+import android.annotation.SuppressLint
+import android.bluetooth.le.ScanResult
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,13 +31,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import fr.isen.pretesacque.androidsmartdevice.R
 
+@SuppressLint("MissingPermission")
 @Composable
 fun ScanScreen(
     innerPadding: PaddingValues,
     scanning: Boolean,
-    BLE_List: List<String>,
+    BLE_List: List<ScanResult>,
     toggleScan: () -> Unit,
-    //onStopScan: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -63,7 +65,7 @@ fun ScanScreen(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(if (scanning) "Scan en cours" else "Lancer la recherche")
+                Text(if (!scanning) "Scan en cours" else "Lancer la recherche")
                 Image(
                     modifier = Modifier
                         .size(100.dp)
@@ -71,14 +73,14 @@ fun ScanScreen(
                         .clickable {
                             toggleScan()
                         },
-                    painter = painterResource(if (scanning) R.drawable.pause_blue_button_1 else R.drawable.play_blue_button),
+                    painter = painterResource(if (!scanning) R.drawable.pause_blue_button_1 else R.drawable.play_blue_button),
                     contentDescription = "pause",
                 )
             }
 
 
         }
-        if (scanning) {
+        if (!scanning) {
             LinearProgressIndicator(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -88,20 +90,21 @@ fun ScanScreen(
             )
         }
 
-        Column {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-                    .clickable{},
-                verticalArrangement = Arrangement.spacedBy(8.dp) // Espace entre les éléments
-            ) {
-                items(BLE_List) { name ->
-                    Text(text = name)
-                }
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Top,
+            contentPadding = PaddingValues(16.dp)
+        ) {
+            items(BLE_List) { result ->
+                val deviceName = result.device.name
+                    ?: "Unknown Device" // Récupérer le nom ou afficher "Unknown Device"
+                val deviceAddress = result.device.address // Adresse MAC de l'appareil
+
+                Text(
+                    text = deviceName,
+                )
 
             }
-
         }
     }
 }
