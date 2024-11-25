@@ -5,7 +5,6 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -21,7 +20,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,7 +49,7 @@ class ScanActivity : ComponentActivity() {
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             if (permissions.all { it.value }) {
                 // Si toutes les permissions sont accordées, procéder à l'action suivante
-                //TODO : mettre fonction scanning
+                toggleScan()
             } else {
                 // Gérer le cas où une ou plusieurs permissions sont refusées
                 // Par exemple, montrer un message à l'utilisateur
@@ -69,7 +67,6 @@ class ScanActivity : ComponentActivity() {
 
         override fun onScanFailed(errorCode: Int) {
             Log.e("ScanActivity", "Scan échoué avec le code d'erreur : $errorCode")
-            Toast.makeText(this@ScanActivity, "Scan échoué", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -99,12 +96,13 @@ class ScanActivity : ComponentActivity() {
                 }) { innerPadding ->
                 ScanScreen(
                     innerPadding = innerPadding,
-                    BLE_List = devices,
+                    bleList = devices,
                     toggleScan = {
                         connectionStatus = !connectionStatus
                         toggleScan()
                     },
-                    scanning = connectionStatus
+                    scanning = connectionStatus,
+                    connection = :: goToConnection
                 )
             }
         }
@@ -159,7 +157,7 @@ class ScanActivity : ComponentActivity() {
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == RESULT_OK) {
                     // L'utilisateur a activé le Bluetooth
-                    Toast.makeText(this, "Bluetooth activé", Toast.LENGTH_SHORT).show()
+                    Log.d("ScanActivity", "Bluetooth activé")
                 } else {
                     // L'utilisateur a refusé d'activer le Bluetooth
                 }
@@ -219,17 +217,14 @@ class ScanActivity : ComponentActivity() {
         try {
             devices.clear()  // Effacer les appareils détectés avant de lancer un nouveau scan
             bluetoothLeScanner?.startScan(leScanCallback)
-            Toast.makeText(this, "Scan BLE démarré", Toast.LENGTH_SHORT).show()
         } catch (e: SecurityException) {
             Log.e("ScanActivity", "Permissions manquantes : ${e.message}")
-            Toast.makeText(this, "Permissions requises pour le scan BLE.", Toast.LENGTH_LONG).show()
         }
     }
 
     private fun stopScan() {
         try {
             bluetoothLeScanner?.stopScan(leScanCallback)
-            Toast.makeText(this, "Scan BLE arrêté", Toast.LENGTH_SHORT).show()
         } catch (e: SecurityException) {
             Log.e("ScanActivity", "Permissions manquantes pour arrêter le scan : ${e.message}")
         }
@@ -242,8 +237,16 @@ class ScanActivity : ComponentActivity() {
         }
     }
 
+    ///Fonctions pour naviguer entre les pages
+    //Pour revenir en arrière
     private fun goBack(){
         val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+    }
+
+    //Pour aller à la page d'interraction
+    private fun goToConnection(){
+        val intent = Intent(this, ConnectivityActivity::class.java)
         startActivity(intent)
     }
 }

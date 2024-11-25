@@ -49,6 +49,7 @@ fun MainContentComponent(innerPadding: PaddingValues, onButtonClick: () -> Unit)
             Text(
                 text = "Cette application permet de scanner des appareils BLE à proximité.",
                 textAlign = Center,
+                color = Color(0xFF7D7D80)
 
                 )
             Image(

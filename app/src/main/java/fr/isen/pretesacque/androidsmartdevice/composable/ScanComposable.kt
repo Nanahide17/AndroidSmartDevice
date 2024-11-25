@@ -15,14 +15,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign.Companion.Center
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import fr.isen.pretesacque.androidsmartdevice.R
@@ -32,8 +35,9 @@ import fr.isen.pretesacque.androidsmartdevice.R
 fun ScanScreen(
     innerPadding: PaddingValues,
     scanning: Boolean,
-    BLE_List: List<ScanResult>,
+    bleList: List<ScanResult>,
     toggleScan: () -> Unit,
+    connection: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -51,7 +55,10 @@ fun ScanScreen(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(if (!scanning) "Scan en cours" else "Lancer la recherche")
+                Text(if (!scanning) "Scan en cours" else "Lancer la recherche",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                    )
                 Image(
                     modifier = Modifier
                         .size(100.dp)
@@ -79,13 +86,29 @@ fun ScanScreen(
             verticalArrangement = Arrangement.Top,
             contentPadding = PaddingValues(16.dp)
         ) {
-            items(BLE_List) { result ->
-                val deviceName = result.device.name ?: "Unknown Device"
-                val deviceAddress = result.device.address
+            items(bleList) { result ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val deviceName = result.device.name ?: "Unknown Device"
+                    val deviceAddress = result.device.address
 
-                Column(modifier = Modifier.padding(8.dp)) {
-                    Text(text = "Name: $deviceName")
-                    Text(text = "Address: $deviceAddress")
+                    Column(modifier = Modifier.padding(8.dp)) {
+                        Text(text = "Name: $deviceName")
+                        Text(text = "Address: $deviceAddress")
+                    }
+                    Button(onClick = { connection() },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF191FB7),
+                            contentColor = Color.White
+                        ))
+                    { Text("Connexion",
+                        fontSize = 12.sp) }
+
                 }
             }
         }
