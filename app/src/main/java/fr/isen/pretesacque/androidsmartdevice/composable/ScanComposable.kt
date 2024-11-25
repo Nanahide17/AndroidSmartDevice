@@ -19,10 +19,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -40,22 +36,12 @@ fun ScanScreen(
     toggleScan: () -> Unit,
 ) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding), // Applique le padding
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "SCAN",
-                fontSize = 22.sp,
-                textAlign = Center,
-                modifier = Modifier.padding(innerPadding)
-            )
-        }
-
         Box(
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center
@@ -77,8 +63,6 @@ fun ScanScreen(
                     contentDescription = "pause",
                 )
             }
-
-
         }
         if (!scanning) {
             LinearProgressIndicator(
@@ -96,14 +80,13 @@ fun ScanScreen(
             contentPadding = PaddingValues(16.dp)
         ) {
             items(BLE_List) { result ->
-                val deviceName = result.device.name
-                    ?: "Unknown Device" // Récupérer le nom ou afficher "Unknown Device"
-                val deviceAddress = result.device.address // Adresse MAC de l'appareil
+                val deviceName = result.device.name ?: "Unknown Device"
+                val deviceAddress = result.device.address
 
-                Text(
-                    text = deviceName,
-                )
-
+                Column(modifier = Modifier.padding(8.dp)) {
+                    Text(text = "Name: $deviceName")
+                    Text(text = "Address: $deviceAddress")
+                }
             }
         }
     }
