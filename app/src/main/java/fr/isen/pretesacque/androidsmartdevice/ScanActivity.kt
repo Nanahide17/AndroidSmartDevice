@@ -1,6 +1,7 @@
 package fr.isen.pretesacque.androidsmartdevice
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.pm.PackageManager
@@ -111,7 +112,7 @@ class ScanActivity : ComponentActivity() {
                         toggleScan()
                     },
                     scanning = connectionStatus,
-                    connection = { goToConnection() }
+                    connection = { selectedDevice -> goToConnection(selectedDevice) }
                 )
             }
         }
@@ -249,8 +250,11 @@ class ScanActivity : ComponentActivity() {
         startActivity(intent)
     }
     //Pour aller à la page d'interraction
-    private fun goToConnection(){
+    @SuppressLint("MissingPermission")
+    private fun goToConnection(selectedDevice: ScanResult){
         val intent = Intent(this, ConnectivityActivity::class.java)
+        intent.putExtra("device_name", selectedDevice.device.name ?: "Unknown Device")
+        intent.putExtra("device_address", selectedDevice.device.address)
         startActivity(intent)
     }
 

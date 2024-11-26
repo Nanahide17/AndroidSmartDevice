@@ -15,10 +15,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.Text
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun ConnectivityScreen(
-    innerPadding : PaddingValues
+    innerPadding : PaddingValues,
+    deviceName: String,
+    deviceAddress: String
 ) {
     Column(
         modifier = Modifier
@@ -27,7 +31,14 @@ fun ConnectivityScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Text(text = "Nom : $deviceName",
+            color = Color(0xFF747474))
+        Text(text = "Adresse : $deviceAddress",
+            color = Color(0xFF747474))
         Text(text="Connexion en cours",
+            modifier = Modifier.padding(16.dp),
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
             color = Color(0xFF747474))
 
         CircularProgressIndicator(

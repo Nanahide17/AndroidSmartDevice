@@ -37,7 +37,7 @@ fun ScanScreen(
     scanning: Boolean,
     bleList: List<ScanResult>,
     toggleScan: () -> Unit,
-    connection: () -> Unit
+    connection: (ScanResult) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -101,7 +101,7 @@ fun ScanScreen(
                         Text(text = "Name: $deviceName")
                         Text(text = "Address: $deviceAddress")
                     }
-                    Button(onClick = connection,
+                    Button(onClick = { connection(result) },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF191FB7),
                             contentColor = Color.White
