@@ -256,7 +256,6 @@ class ScanActivity : ComponentActivity() {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         }
-
     }
     //Pour aller à la page d'interraction
     @SuppressLint("MissingPermission")

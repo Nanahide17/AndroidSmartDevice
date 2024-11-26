@@ -1,12 +1,14 @@
 package fr.isen.pretesacque.androidsmartdevice
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -65,5 +67,23 @@ class ConnectivityActivity : ComponentActivity() {
 
         bluetoothDevice = bluetoothAdapter?.getRemoteDevice(deviceAddress)
         bluetoothGatt = bluetoothDevice?.connectGatt(this, false, bluetoothGattCallback)
+
+        if (isConnected) {
+
+        } else {
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("Problème de connexion")
+            builder.setMessage("Votre appareil n'a pas pu se connecter à l'appareil séléctionner ")
+            builder.setPositiveButton("OK") { _, _ ->
+                goBack()
+            }
+            val dialog: AlertDialog = builder.create()
+            dialog.show()
+        }
+    }
+
+    private fun goBack() {
+        val intent = Intent(this, ScanActivity::class.java)
+        startActivity(intent)
     }
 }
