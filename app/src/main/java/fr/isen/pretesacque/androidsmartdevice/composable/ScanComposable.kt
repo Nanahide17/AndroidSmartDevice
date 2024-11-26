@@ -42,7 +42,7 @@ fun ScanScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(innerPadding), // Applique le padding
+            .padding(innerPadding),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -101,7 +101,7 @@ fun ScanScreen(
                         Text(text = "Name: $deviceName")
                         Text(text = "Address: $deviceAddress")
                     }
-                    Button(onClick = { connection() },
+                    Button(onClick = connection,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF191FB7),
                             contentColor = Color.White

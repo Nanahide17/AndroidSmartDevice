@@ -52,13 +52,22 @@ class ScanActivity : ComponentActivity() {
                 toggleScan()
             } else {
                 // Gérer le cas où une ou plusieurs permissions sont refusées
-                // Par exemple, montrer un message à l'utilisateur
-
+                val builder = AlertDialog.Builder(this)
+                builder.setTitle("Permissions non accordées")
+                builder.setMessage("Toutes les permissions nécéssaires à l'application ne sont pas accéptées")
+                builder.setPositiveButton("OK") { _, _ ->
+                    this.finishAffinity()
+                }
+                val dialog: AlertDialog = builder.create()
+                dialog.show()
             }
         }
+    //Liste des devices trouvé
     private val devices = mutableStateListOf<ScanResult>()
+    //Permet de savoir si le scan est en cours ou non
     private var connectionStatus by mutableStateOf(true)
 
+    //Variable pour gérer le scan
     private val leScanCallback: ScanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
@@ -102,7 +111,7 @@ class ScanActivity : ComponentActivity() {
                         toggleScan()
                     },
                     scanning = connectionStatus,
-                    connection = :: goToConnection
+                    connection = { goToConnection() }
                 )
             }
         }
@@ -139,7 +148,6 @@ class ScanActivity : ComponentActivity() {
             return false
         }
     }
-
     //Vérifie si le Bluetooth est activé ou non
     private fun checkBluetoothActivated() {
         if (bluetoothAdapter!!.isEnabled) {
@@ -149,7 +157,6 @@ class ScanActivity : ComponentActivity() {
         }
 
     }
-
     //Demande à l'utilisateur d'activé son Bluetooth
     private fun requestBluetoothActivation() {
         val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
@@ -177,7 +184,6 @@ class ScanActivity : ComponentActivity() {
             ) == PackageManager.PERMISSION_GRANTED
         }
     }
-
     //Demande toutes les permissions pour le Bluetooth
     private fun getAllPermissionsForBLE(): Array<String> {
         var allPermissions = arrayOf(
@@ -203,8 +209,7 @@ class ScanActivity : ComponentActivity() {
 
 
     ///Fonctions pour lancer le bluetooth
-    // Méthode pour démarrer la découverte Bluetooth
-
+    //Permet de savoir si nous devons lancer ou non le scan bluetooth
     private fun toggleScan() {
         if (connectionStatus) {
             stopScan()
@@ -212,7 +217,7 @@ class ScanActivity : ComponentActivity() {
             startScan()
         }
     }
-
+    // Méthode pour démarrer la découverte Bluetooth
     private fun startScan() {
         try {
             devices.clear()  // Effacer les appareils détectés avant de lancer un nouveau scan
@@ -221,7 +226,7 @@ class ScanActivity : ComponentActivity() {
             Log.e("ScanActivity", "Permissions manquantes : ${e.message}")
         }
     }
-
+    //Arrête le scan bluetooth
     private fun stopScan() {
         try {
             bluetoothLeScanner?.stopScan(leScanCallback)
@@ -229,7 +234,7 @@ class ScanActivity : ComponentActivity() {
             Log.e("ScanActivity", "Permissions manquantes pour arrêter le scan : ${e.message}")
         }
     }
-
+    //Permet de vérifier si le device est déjà présent ou non dans la liste
     private fun addDeviceIfNotExists(result: ScanResult) {
         // Vérifiez si l'adresse MAC du périphérique existe déjà dans la liste
         if (devices.none { it.device.address == result.device.address }) {
@@ -243,10 +248,10 @@ class ScanActivity : ComponentActivity() {
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
     }
-
     //Pour aller à la page d'interraction
     private fun goToConnection(){
         val intent = Intent(this, ConnectivityActivity::class.java)
         startActivity(intent)
     }
+
 }
