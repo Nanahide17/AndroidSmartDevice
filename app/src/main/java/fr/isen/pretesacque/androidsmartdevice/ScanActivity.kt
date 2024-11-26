@@ -246,16 +246,36 @@ class ScanActivity : ComponentActivity() {
     ///Fonctions pour naviguer entre les pages
     //Pour revenir en arrière
     private fun goBack(){
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
+        if (connectionStatus){
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
+        else{
+            toggleScan()
+            connectionStatus = true
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
+
     }
     //Pour aller à la page d'interraction
     @SuppressLint("MissingPermission")
     private fun goToConnection(selectedDevice: ScanResult){
-        val intent = Intent(this, ConnectivityActivity::class.java)
-        intent.putExtra("device_name", selectedDevice.device.name ?: "Unknown Device")
-        intent.putExtra("device_address", selectedDevice.device.address)
-        startActivity(intent)
+        if (connectionStatus){
+            val intent = Intent(this, ConnectivityActivity::class.java)
+            intent.putExtra("device_name", selectedDevice.device.name ?: "Unknown Device")
+            intent.putExtra("device_address", selectedDevice.device.address)
+            startActivity(intent)
+        }
+        else{
+            connectionStatus = true
+            toggleScan()
+            val intent = Intent(this, ConnectivityActivity::class.java)
+            intent.putExtra("device_name", selectedDevice.device.name ?: "Unknown Device")
+            intent.putExtra("device_address", selectedDevice.device.address)
+            startActivity(intent)
+        }
+
     }
 
 }
