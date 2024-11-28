@@ -38,11 +38,9 @@ class ConnectivityActivity : ComponentActivity() {
 
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
-                Log.d("BLE", "Connection avec le serveur")
                 isConnected = true
                 gatt.discoverServices()
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                Log.d("BLE", "Déconnexion du serveur")
                 isConnected = false
             }
         }
@@ -69,13 +67,14 @@ class ConnectivityActivity : ComponentActivity() {
         bluetoothGatt = bluetoothDevice?.connectGatt(this, false, bluetoothGattCallback)
 
         if (isConnected) {
-
+            goToInterraction()
         } else {
             val builder = AlertDialog.Builder(this)
-            builder.setTitle("Problème de connexion")
-            builder.setMessage("Votre appareil n'a pas pu se connecter à l'appareil séléctionner ")
+            builder.setTitle("Problème lors de la connexion")
+            builder.setMessage("Votre appareil n'a pas pu se connecter à l'appareil séléctionner. Veuillez en resélectionner un")
             builder.setPositiveButton("OK") { _, _ ->
-                goBack()
+                //goBack() TODO : Switch une fois le code tester sur carte
+                goToInterraction()
             }
             val dialog: AlertDialog = builder.create()
             dialog.show()
@@ -84,6 +83,11 @@ class ConnectivityActivity : ComponentActivity() {
 
     private fun goBack() {
         val intent = Intent(this, ScanActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun goToInterraction(){
+        val intent = Intent(this, InterractionActivity::class.java)
         startActivity(intent)
     }
 }

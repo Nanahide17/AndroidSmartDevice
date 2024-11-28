@@ -67,7 +67,7 @@ fun ScanScreen(
                             toggleScan()
                         },
                     painter = painterResource(if (!scanning) R.drawable.pause_blue_button_1 else R.drawable.play_blue_button),
-                    contentDescription = "pause",
+                    contentDescription = "pause"
                 )
             }
         }
