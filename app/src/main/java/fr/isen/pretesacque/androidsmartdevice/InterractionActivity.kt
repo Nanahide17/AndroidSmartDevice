@@ -126,7 +126,8 @@ class InterractionActivity : ComponentActivity() {
                         if (selectedLED != null) {
                             ledInterraction(bluetoothGatt = bluetoothGatt, ledCharacteristic, selectedLED)
                         }
-                    })
+                    },
+                    listLeds = leds)
 
             }
         }
