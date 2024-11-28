@@ -25,12 +25,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.startActivity
 import fr.isen.pretesacque.androidsmartdevice.composable.InterractionScreen
 
 @SuppressLint("MissingPermission")
 class InterractionActivity : ComponentActivity() {
+
 
     private var bluetoothGatt: BluetoothGatt? = null
     private var ledCharacteristic: BluetoothGattCharacteristic? = null
@@ -44,7 +43,6 @@ class InterractionActivity : ComponentActivity() {
     private val bluetoothGattCallback = object : BluetoothGattCallback() {
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
-                //isConnected = true
                 gatt.discoverServices()
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 val builder = AlertDialog.Builder(this@InterractionActivity)
@@ -55,7 +53,6 @@ class InterractionActivity : ComponentActivity() {
                 }
                 val dialog: AlertDialog = builder.create()
                 dialog.show()
-                //isConnected = false
             }
         }
 
@@ -131,6 +128,7 @@ class InterractionActivity : ComponentActivity() {
 
             }
         }
+        bluetoothGatt?.discoverServices()
     }
 
     private fun ledInterraction(bluetoothGatt: BluetoothGatt?, ledCharacteristic: BluetoothGattCharacteristic?, ledToSwitch: LED) {
