@@ -10,7 +10,6 @@ import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -72,8 +71,8 @@ class ConnectivityActivity : ComponentActivity() {
             builder.setTitle("Problème lors de la connexion")
             builder.setMessage("Votre appareil n'a pas pu se connecter à l'appareil séléctionner. Veuillez en resélectionner un")
             builder.setPositiveButton("OK") { _, _ ->
-                //goBack() TODO : Switch une fois le code tester sur carte
-                goToInterraction()
+                goBack()
+                //goToInterraction()
             }
             val dialog: AlertDialog = builder.create()
             dialog.show()
